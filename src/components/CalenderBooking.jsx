@@ -1,44 +1,24 @@
-import React from 'react";
-import { motion } from "framer-motion";
-
-import { Button } from "@/components/ui/button";
-
-
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Button } from '@/components/ui/button';
 import { Calendar, Clock, X, ArrowLeft } from 'lucide-react';
 
-const CalenderBooking = () => {
-    const [isOpen, setIsOpen] = useState(false);
-    const [step, setStep] = useState(1);
-    const [selectedDate, setSelectedDate] = useState("");
+const CalendarBooking = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [step, setStep] = useState(1);
+  const [selectedDate, setSelectedDate] = useState('');
+  const [selectedTime, setSelectedTime] = useState('');
 
-    const [selectedItem, setSelectedItem] = useState("");
-
-
-    // genreate next 30 days (weekdays only) 
-
-    const generateDates = () => {
-        const dates = []; 
-
-        const [step, setStep] = useState(false);
-        const [selectedDate, setSelectedDate] = useState("");
-
-        const [selectedItem, setSelectedItem] = useState("");
-
-        // genrate next 30 days (weekdays only)
-
-
-        const generateTimes = () => {
-            const dates = [];
-
-            const today = new Date();
-
-            for (let i = 0; i <= 30; i++) {
-                const date = new Date(today);
-
-                date.setDate(today.getDate() + i);
-
-                const dayOfWeek = date.getDay();
-                
+  // Generate next 30 days (weekdays only)
+  const generateDates = () => {
+    const dates = [];
+    const today = new Date();
+    
+    for (let i = 1; i <= 30; i++) {
+      const date = new Date(today);
+      date.setDate(today.getDate() + i);
+      const dayOfWeek = date.getDay();
+      
       if (dayOfWeek !== 0 && dayOfWeek !== 6) { // Skip weekends
         dates.push({
           date: date.toISOString().split('T')[0],
@@ -53,14 +33,12 @@ const CalenderBooking = () => {
     return dates;
   };
 
-
-  // avaible tie slots 
+  // Available time slots
   const timeSlots = [
     '09:00 AM', '10:00 AM', '11:00 AM', 
     '12:00 PM', '01:00 PM', '02:00 PM', 
     '03:00 PM', '04:00 PM'
   ];
-
 
   const dates = generateDates();
 
@@ -74,8 +52,6 @@ const CalenderBooking = () => {
     setStep(3);
   };
 
-
- 
   const handleBookCall = () => {
     // Create Google Calendar URL
     const startTime = `${selectedDate}T${selectedTime.replace(' ', '')}`;
@@ -85,50 +61,29 @@ const CalenderBooking = () => {
     
     window.open(googleCalendarUrl, '_blank');
     resetBooking();
-  };  
-  
-  const getEndTime = (time) => {
+  };
+
+  const getEndTime = (startTime) => {
     const timeMap = {
-        '09:00 AM': '10:00AM', '10:00 AM': '11:00AM',
-        '11:00 AM': '12:00PM', '12:00 PM': '01:00PM',
-        '01:00 PM': '02:00PM', '02:00 PM': '03:00PM',
-        '03:00 PM': '04:00PM', '04:00 PM': '05:00PM',
+      '09:00 AM': '10:00AM', '10:00 AM': '11:00AM',
+      '11:00 AM': '12:00PM', '12:00 PM': '01:00PM',
+      '01:00 PM': '02:00PM', '02:00 PM': '03:00PM',
+      '03:00 PM': '04:00PM', '04:00 PM': '05:00PM',
     };
-
     return timeMap[startTime] || '05:00PM';
-
-
   };
 
   const resetBooking = () => {
     setIsOpen(false);
-
     setStep(1);
-    setSelectedDate("");
-
-    setSelectedTime("");
-
-
+    setSelectedDate('');
+    setSelectedTime('');
   };
 
   const goBack = () => {
-    if (step > 1) setStep(step -1);
-
-
+    if (step > 1) setStep(step - 1);
   };
 
-  if (!isOpen) {
-    return (
-        <Button 
-        variant="outline"
-        size="lg"
-        className="text-lg px-8 py-4 rounded-full border-white/20 hover:bg-white/10"
-        onClick={() => setIsOpen(true)}
-        >
-            Book a call
-        </Button>
-    )
-  };
   if (!isOpen) {
     return (
       <Button 
@@ -141,8 +96,6 @@ const CalenderBooking = () => {
       </Button>
     );
   }
-
-
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
