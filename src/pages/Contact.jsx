@@ -59,16 +59,16 @@ const Contact = () => {
       icon: <Mail className="h-6 w-6 text-white" />,
       title: "Email",
       details: [
-        "sofoniyastekalegn@gmail.com"
-        "joel@aiwaveagency.com",
+        "sofoniyastekalegn@gmail.com",
+        "joel@aiwaveagency.com"
       ]
     },
     {
       icon: <Phone className="h-6 w-6 text-white" />,
       title: "Phone",
       details: [
-        "+251978695556"
-        "+12403939520",
+        "+251978695556",
+        "+12403939520"
       ]
     },
     {
