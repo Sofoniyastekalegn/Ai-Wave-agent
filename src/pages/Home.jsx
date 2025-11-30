@@ -4,8 +4,13 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Zap, BarChart3, Users, ShieldCheck, Settings, Headphones } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-
+import CalendarBooking from '@/components/CalenderBooking';
+/**
+ * Home Page - Main landing page for AI WaveAgency
+ * Features hero section, services overview, and booking integration
+ */
 const Home = () => {
+  // Features data for services section
   const features = [
     {
       icon: <Zap className="h-8 w-8" />,
@@ -24,6 +29,7 @@ const Home = () => {
     }
   ];
 
+  // Benefits data for why choose us section
   const whyChooseUs = [
     {
       icon: <ShieldCheck className="h-8 w-8" />,
@@ -89,15 +95,8 @@ const Home = () => {
                     </Button>
                   </Link>
                   
-                  <Link to="/about">
-                    <Button 
-                      variant="outline" 
-                      size="lg" 
-                      className="text-lg px-8 py-4 rounded-full border-white/20 hover:bg-white/10"
-                    >
-                      Learn More
-                    </Button>
-                  </Link>
+                  {/* Calendar Booking Component */}
+                  <CalendarBooking />
                 </motion.div>
               </motion.div>
 
@@ -105,19 +104,42 @@ const Home = () => {
                 initial={{ opacity: 0, scale: 0.8, x: 50 }}
                 animate={{ opacity: 1, scale: 1, x: 0 }}
                 transition={{ duration: 0.8, delay: 0.4, type: "spring", stiffness: 100 }}
-                whileHover={{ scale: 1.05, y: -10, transition: { duration: 0.3 } }}
-                className="hidden md:block"
+                className="hidden md:flex flex-col items-center"
               >
-                <img 
+                <motion.img 
+                  whileHover={{ scale: 1.05, y: -10, transition: { duration: 0.3 } }}
                   src="https://images.ctfassets.net/un655fb9wln6/1lNzwYsBP3p2rpTZe6ijqn/bb4bcbf22b29d6a812968fa02e640ac8/poster.png" 
                   alt="AI Automation Workflow" 
                   className="w-full h-auto object-contain drop-shadow-2xl"
                 />
+                <Link to="/dashboard" className="mt-8">
+                  <motion.div
+                    animate={{ 
+                      y: [0, -10, 0],
+                      scale: [1, 1.05, 1]
+                    }}
+                    transition={{ 
+                      duration: 2,
+                      repeat: Infinity,
+                      repeatType: "loop",
+                      ease: "easeInOut"
+                    }}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Button 
+                      size="lg" 
+                      className="gradient-bg hover:opacity-90 text-lg px-10 py-5 rounded-full shadow-lg shadow-purple-500/30"
+                    >
+                      Try Demo
+                    </Button>
+                  </motion.div>
+                </Link>
               </motion.div>
             </div>
           </div>
 
-          {/* Floating Elements */}
+          {/* Background Floating Elements */}
           <div className="absolute top-20 left-10 animate-float">
             <div className="w-20 h-20 rounded-full bg-blue-500/20 blur-xl"></div>
           </div>
@@ -204,7 +226,7 @@ const Home = () => {
           </div>
         </section>
 
-        {/* CTA Section */}
+        {/* Call to Action Section */}
         <section className="py-20 bg-gradient-to-r from-blue-900/50 to-purple-900/50">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <motion.div
