@@ -85,4 +85,47 @@ const CalenderBooking = () => {
     
     window.open(googleCalendarUrl, '_blank');
     resetBooking();
-  };   
+  };  
+  
+  const getEndTime = (time) => {
+    const timeMap = {
+        '09:00 AM': '10:00AM', '10:00 AM': '11:00AM',
+        '11:00 AM': '12:00PM', '12:00 PM': '01:00PM',
+        '01:00 PM': '02:00PM', '02:00 PM': '03:00PM',
+        '03:00 PM': '04:00PM', '04:00 PM': '05:00PM',
+    };
+
+    return timeMap[startTime] || '05:00PM';
+
+
+  };
+
+  const resetBooking = () => {
+    setIsOpen(false);
+
+    setStep(1);
+    setSelectedDate("");
+
+    setSelectedTime("");
+
+
+  };
+
+  const goBack = () => {
+    if (step > 1) setStep(step -1);
+
+
+  };
+
+  if (!isOpen) {
+    return (
+        <Button 
+        variant="outline"
+        size="lg"
+        className="text-lg px-8 py-4 rounded-full border-white/20 hover:bg-white/10"
+        onClick={() => setIsOpen(true)}
+        >
+            Book a call
+        </Button>
+    )
+  }
