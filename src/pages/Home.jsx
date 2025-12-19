@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Zap, BarChart3, Users, ShieldCheck, Settings, Headphones } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import CalendarBooking from '@/components/CalenderBooking';
+import CalendarBooking from '@/components/CalendarBooking';
 /**
  * Home Page - Main landing page for AI WaveAgency
  * Features hero section, services overview, and booking integration
