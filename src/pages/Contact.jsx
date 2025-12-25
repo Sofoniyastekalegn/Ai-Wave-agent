@@ -5,6 +5,7 @@ import { Mail, Send, MessageCircle, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { useLocation } from 'react-router-dom';
+import { supabase } from '@/lib/customSupabaseClient';
 
 const Contact = () => {
   const { toast } = useToast();
@@ -30,7 +31,7 @@ const Contact = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!formData.name || !formData.email || !formData.message) {
@@ -42,16 +43,121 @@ const Contact = () => {
       return;
     }
 
-    toast({
-      title: "Message sent successfully! 🎉",
-      description: "We'll get back to you within 24 hours."
-    });
+    try {
+      // Save to Supabase - try contact_submissions first, fallback to contacts if needed
+      let data, error;
+      
+      // Try contact_submissions table first
+      const result = await supabase
+        .from('contact_submissions')
+        .insert([
+          {
+            name: formData.name,
+            email: formData.email,
+            message: formData.message,
+            status: 'new',
+          },
+        ])
+        .select();
 
-    setFormData({
-      name: '',
-      email: '',
-      message: ''
-    });
+      // Get the first inserted record (or null if array is empty)
+      data = result.data && result.data.length > 0 ? result.data[0] : null;
+      error = result.error;
+
+      // If contact_submissions doesn't exist, try 'contacts' table
+      if (error && (error.code === '42P01' || error.message?.includes('does not exist'))) {
+        console.warn('contact_submissions table not found, trying contacts table');
+        const fallbackResult = await supabase
+          .from('contacts')
+          .insert([
+            {
+              name: formData.name,
+              email: formData.email,
+              message: formData.message,
+            },
+          ])
+          .select();
+        
+        data = fallbackResult.data && fallbackResult.data.length > 0 ? fallbackResult.data[0] : null;
+        error = fallbackResult.error;
+      }
+
+      if (error) {
+        console.error('Supabase error:', error);
+        // Show more specific error message
+        let errorMessage = "Please try again later or contact us directly via email.";
+        if (error.message) {
+          errorMessage = error.message;
+        } else if (error.code === '42501') {
+          errorMessage = "Permission denied. Please check database permissions.";
+        } else if (error.code === '42P01') {
+          errorMessage = "Database table not found. Please create the contact_submissions table.";
+        }
+        
+        toast({
+          variant: "destructive",
+          title: "Error saving message",
+          description: errorMessage
+        });
+        return;
+      }
+
+      // If no error but no data returned, the insert still succeeded
+      // This can happen with RLS - the insert works but select is blocked
+      if (!data && !error) {
+        console.log('Insert successful but no data returned (RLS may be blocking SELECT)');
+        // Still show success - the data was saved
+      }
+
+      // Email will be sent via Supabase database trigger/webhook
+      // The trigger is set up to call the send-contact-email Edge Function
+      // For now, we'll also try to send email directly via a simple API call
+      try {
+        // Try to trigger email sending via Edge Function (non-blocking)
+      // This will work once the Edge Function is deployed and webhook is configured
+      if (data?.id) {
+        fetch('https://rparoorbiarrojekvrrf.supabase.co/functions/v1/send-contact-email', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJwYXJvb3JiaWFycm9qZWt2cnJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgxODMzOTYsImV4cCI6MjA3Mzc1OTM5Nn0.AmpaZMeYIu_eWSDMqXD_WCwyJNO2SLfJbzCE8Nt_k00',
+          },
+          body: JSON.stringify({
+            record: {
+              id: data.id,
+              name: formData.name,
+              email: formData.email,
+              message: formData.message,
+              created_at: data.created_at || new Date().toISOString(),
+            }
+          }),
+        }).catch(err => {
+          // Email sending is handled by webhook/trigger, so this is non-critical
+          console.log('Direct email trigger failed (webhook will handle):', err);
+        });
+      }
+      } catch (emailErr) {
+        console.log('Email sending will be handled by webhook/trigger');
+      }
+
+      toast({
+        title: "Message sent successfully! 🎉",
+        description: "We'll get back to you within 24 hours."
+      });
+
+      setFormData({
+        name: '',
+        email: '',
+        message: ''
+      });
+    } catch (error) {
+      console.error('Form submission error:', error);
+      toast({
+        variant: "destructive",
+        title: "Error sending message",
+        description: error.message || "Please try again later or contact us directly via email."
+      });
+    }
   };
 
   const contactInfo = [
