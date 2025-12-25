@@ -13,18 +13,31 @@ export class EmailService {
     })
   }
 
-  async sendContactNotification(formData, recipientEmail = process.env.CONTACT_RECIPIENT_EMAIL) {
+  async sendContactNotification(formData, recipientEmails = null) {
     try {
+      // Default recipients: sofoniyastekalegn@gmail.com and joelgerbi1@gmail.com
+      const defaultRecipients = ['sofoniyastekalegn@gmail.com', 'joelgerbi1@gmail.com'];
+      const recipients = recipientEmails || process.env.CONTACT_RECIPIENT_EMAIL 
+        ? (Array.isArray(recipientEmails) ? recipientEmails : [recipientEmails || process.env.CONTACT_RECIPIENT_EMAIL])
+        : defaultRecipients;
+
+      // If single email string provided, convert to array
+      const emailList = Array.isArray(recipients) ? recipients : [recipients];
+      
+      // Ensure both required emails are included
+      const requiredEmails = ['sofoniyastekalegn@gmail.com', 'joelgerbi1@gmail.com'];
+      const finalRecipients = [...new Set([...emailList, ...requiredEmails])];
+
       const mailOptions = {
         from: `"Contact Form" <${process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER}>`,
-        to: recipientEmail,
+        to: finalRecipients.join(', '),
         subject: `New Contact Form Submission from ${formData.name}`,
         html: this.generateEmailTemplate(formData),
         replyTo: formData.email,
       }
 
       const info = await this.transporter.sendMail(mailOptions)
-      return { success: true, messageId: info.messageId }
+      return { success: true, messageId: info.messageId, recipients: finalRecipients }
     } catch (error) {
       console.error('Error sending email:', error)
       throw new Error('Failed to send email notification')
